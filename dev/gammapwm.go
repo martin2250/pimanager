@@ -1,7 +1,6 @@
 package gammapwm
 
 import (
-	"fmt"
 	"periph.io/x/periph/conn/i2c"
 	"periph.io/x/periph/conn/i2c/i2creg"
 )
