@@ -1,0 +1,11 @@
+[[constraint]]
+  name = "github.com/gorilla/mux"
+  version = "1.6.2"
+
+[[constraint]]
+  name = "periph.io/x/periph"
+  version = "3.4.0"
+
+[prune]
+  go-tests = true
+  unused-packages = true
