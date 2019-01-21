@@ -1,0 +1,12 @@
+[Unit]
+Description=martin2250's RPi manager
+After=network.target
+
+[Service]
+Type=simple
+# still have to convert this to a proper arch package
+ExecStart=/root/go/bin/pimanager
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
