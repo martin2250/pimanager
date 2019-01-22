@@ -14,7 +14,7 @@ import (
 
 var pwm = gammapwm.GammaPWM{Bus: `/dev/i2c-1`, Address: 0x33}
 
-func handleLED(w http.ResponseWriter, r *http.Request) {
+func handleLEDset(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	chans := params["channel"]
 	vals := params["value"]
@@ -53,7 +53,27 @@ func handleLED(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Fprintln(w, "error: ", err)
 	} else {
-		fmt.Fprintln(w, "ok")
+		handleLED(w, r)
+	}
+}
+
+func handleLED(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	chans, ok := params["channel"]
+
+	if !ok || chans == `all` {
+		fmt.Fprintln(w, pwm.Value)
+	} else {
+		channel, err := strconv.ParseInt(chans, 10, 32)
+		if err != nil {
+			fmt.Fprintln(w, "could not parse channel")
+			return
+		}
+		if channel < 0 || channel > 7 {
+			fmt.Fprintln(w, "invalid channel")
+			return
+		}
+		fmt.Fprintln(w, pwm.Value[channel])
 	}
 }
 
@@ -62,8 +82,12 @@ func main() {
 		log.Fatal(err)
 	}
 
+	pwm.Init()
+
 	rtr := mux.NewRouter()
-	rtr.HandleFunc("/led/{channel:[0-7]}/{value:(?:\\+|-)?[0-9]+}", handleLED).Methods("GET")
+	rtr.HandleFunc("/led/set/{channel:[0-7]}/{value:(?:\\+|-)?[0-9]+}", handleLEDset).Methods("GET")
+	rtr.HandleFunc("/led/get", handleLED).Methods("GET")
+	rtr.HandleFunc("/led/get/{channel:(?:[0-7]|all)}", handleLED).Methods("GET")
 	http.Handle("/", rtr)
 
 	log.Println("Listening...")

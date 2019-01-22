@@ -27,3 +27,23 @@ func (d *GammaPWM) Update() error {
 	_, err = dev.Write(buffer)
 	return err
 }
+
+func (d *GammaPWM) Init() error {
+	bus, err := i2creg.Open(d.Bus)
+	if err != nil {
+		return err
+	}
+	defer bus.Close()
+
+	dev := i2c.Dev{Bus: bus, Addr: uint16(d.Address)}
+
+	buffer := make([]byte, 8)
+
+	if err = dev.Tx([]byte{0}, buffer); err != nil {
+		return err
+	}
+
+	copy(d.Value[:], buffer[:])
+
+	return err
+}
